@@ -23,9 +23,8 @@ const HealthCheck = sequelize.define('HealthCheck', {
 const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connection established successfully.');
-    await sequelize.sync({ alter: true });
-    console.log('Database synchronized.');
+    console.log('Database is Connected.');
+    await sequelize.sync();
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }
