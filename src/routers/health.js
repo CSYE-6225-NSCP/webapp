@@ -1,5 +1,5 @@
 const express = require('express');
-const { HealthCheck, sequelize } = require('../models');
+const { HealthCheck, sequelize } = require('../models/model');
 const router = express.Router();
 
 router.head('/healthz', (req, res) => {
@@ -11,9 +11,10 @@ router.get('/healthz', async (req, res) => {
   try {
     await sequelize.authenticate(); 
 
-    // console.log('Health check initiated'); 
+    // console.log('auth tested'); 
     
-    if (Object.keys(req.body).length !== 0) {
+    if (Object.keys(req.body).length > 0 || Object.keys(req.query).length > 0 || 
+        req.headers['content-type'] || req.headers['content-length']){
       return res.status(400).set('Cache-Control', 'no-cache').end();
     }
 

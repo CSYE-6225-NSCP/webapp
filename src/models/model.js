@@ -20,14 +20,5 @@ const HealthCheck = sequelize.define('HealthCheck', {
 
 );
 
-const initializeDatabase = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Database is Connected.');
-    await sequelize.sync();
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
-};
 
-module.exports = { HealthCheck, initializeDatabase, sequelize };  
+module.exports = { HealthCheck, sequelize };  
