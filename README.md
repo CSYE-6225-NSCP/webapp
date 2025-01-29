@@ -17,6 +17,14 @@ Techstack used for API :
 
 `http status code of 400 if any payloads is given`
 
+`http://localhost:8080/healthz`
+
+`curl -vvvv http://localhost:8080/healthz`
+
+`curl -vvvv -XPUT http://localhost:8080/healthz`
+
+
+
 
 
 1. After downloading add .env file and run the command `npm install` 
