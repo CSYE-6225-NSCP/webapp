@@ -20,5 +20,12 @@ const HealthCheck = sequelize.define('HealthCheck', {
 
 );
 
+sequelize.sync({ force: true }) 
+  .then(() => {
+  })
+  .catch((err) => {
+    console.error('creating', err);
+  });
+
 
 module.exports = { HealthCheck, sequelize };  
