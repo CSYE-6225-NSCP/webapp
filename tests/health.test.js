@@ -1,28 +1,24 @@
 const request = require("supertest");
-const app = require("../app"); 
+const { app } = require("../app"); 
 const { HealthCheck, sequelize } = require("../src/models/model"); 
 
-let server;
+jest.mock("../src/models/model");
 
-beforeAll(async() => {
-  server = app.listen(3000);
+beforeAll(async () => {
   await sequelize.authenticate();
 });
 
 afterAll(async () => {
   await sequelize.close();
-  await server.close();
 });
-
-jest.mock("../src/models/model"); 
 
 describe("Health Check API Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
+
   test("GET /healthz should return 200 OK", async () => {
-    HealthCheck.create.mockResolvedValue({}); 
+    HealthCheck.create.mockResolvedValue({});
     const res = await request(app).get("/healthz");
     expect(res.status).toBe(200);
   });
@@ -62,6 +58,4 @@ describe("Health Check API Tests", () => {
     const res = await request(app).get("/healthz?param=value");
     expect(res.status).toBe(400);
   });
-
-
 });
