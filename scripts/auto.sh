@@ -37,11 +37,11 @@ EOF
 
 #  Creating application group
 echo "Creating application group..."
-sudo groupadd csye6225app || true
+sudo groupadd csye6225 || true
 
 # new user for the application
 echo "Creating application user..."
-sudo useradd -s /sbin/nologin -g csye6225app csye6225user || true
+sudo useradd -s /sbin/nologin -g csye6225 csye6225user || true
 
 # unzipping the application
 echo "Setting up application directory..."

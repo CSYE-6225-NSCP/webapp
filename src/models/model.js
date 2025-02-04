@@ -12,20 +12,9 @@ const HealthCheck = sequelize.define('HealthCheck', {
     allowNull: false,
     defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
-  
-},{
-    timestamps : false,
-    tableName : "HealthCheck"
-  }
+}, {
+  timestamps: false,
+  tableName: "HealthCheck",
+});
 
-);
-
-sequelize.sync({ force: true }) 
-  .then(() => {
-  })
-  .catch((err) => {
-    console.error('creating', err);
-  });
-
-
-module.exports = { HealthCheck, sequelize };  
+module.exports = { HealthCheck, sequelize };
