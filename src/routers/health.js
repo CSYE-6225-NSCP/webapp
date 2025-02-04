@@ -46,6 +46,10 @@ router.all('/healthz', (req, res) => {
   .end(); 
 });
 
+router.use((req, res) =>{
+  res.status(400). json();
+});
+
 
 
 module.exports = router;
