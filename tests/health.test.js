@@ -54,6 +54,11 @@ describe("Health Check API Tests", () => {
     expect(res.status).toBe(400);
   });
 
+  test("OPTIONS /healthz should return 405 Method Not Allowed", async () => {
+    const res = await request(app).options("/healthz");
+    expect(res.status).toBe(405);
+  });
+
   test("HEAD /healthz should return 405 Method Not allowed", async () => {
     const res = await request(app).head("/healthz");
     expect(res.status).toBe(405);
