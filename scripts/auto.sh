@@ -29,10 +29,14 @@ sudo groupadd csye6225app || true
 sudo useradd -s /sbin/nologin -g csye6225app csye6225user || true
 
 sudo mkdir -p /opt/csye6225
+if ! command -v unzip &> /dev/null; then
+    sudo apt install unzip -y
+fi
 sudo unzip -q webapp-main.zip -d /opt/csye6225/
 
 sudo chown -R csye6225user:csye6225app /opt/csye6225
 sudo find /opt/csye6225 -type d -exec chmod 750 {} \;
-sudo find /opt/csye6225 -type f -exec chmod 640 {} \;
+sudo find /opt/csye6225 -type f ! -name "*.zip" -exec chmod 640 {} \;
+sudo find /opt/csye6225 -type f -name "*.zip" -exec chmod 440 {} \;
 
 echo "SCRIPT IS DONE"
