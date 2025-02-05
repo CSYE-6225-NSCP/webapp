@@ -55,12 +55,6 @@ To start/stop mysql server : `sudo /usr/local/mysql-9.2.0-macos15-arm64/support-
 * Then uploaded my zip file into server using the command :
                   `scp -i ~/.ssh/do /Users/chaitanyam/Desktop/webapp-main.zip root@ipv4:/opt/csye6225/ 
 
-* Due to the mysql size the droplet ram isn't enough so i used swap memory and installed mysql using the command:
-
-        sudo fallocate -l 1G /swapfile
-        sudo chmod 600 /swapfile
-        sudo mkswap /swapfile
-        sudo swapon /swapfile
 
     install mysql in ubuntu server: sudo apt install mysql-server -y`
 
