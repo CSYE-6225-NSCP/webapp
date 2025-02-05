@@ -54,8 +54,31 @@ describe("Health Check API Tests", () => {
     expect(res.status).toBe(400);
   });
 
+  test("HEAD /healthz should return 405 Method Not allowed", async () => {
+    const res = await request(app).head("/healthz");
+    expect(res.status).toBe(405);
+  });
+
   test("GET /healthz with query params should return 400 Bad Request", async () => {
     const res = await request(app).get("/healthz?param=value");
     expect(res.status).toBe(400);
+
+  });
+
+  test("GET /healthz with XML should return 405 Method Not Allowed", async () => {
+    const res = await request(app)
+        .get("/healthz")  
+        .set("Content-Type", "application/xml")  
+        .send("<root><key>value</key></root>");  
+
+    expect(res.status).toBe(400);
+});
+
+    test("GET /healthz with JSON should return 405 Method Not Allowed", async () => {
+      const res = await request(app)
+          .get("/healthz")  
+          .set("Content-Type", "application/json")  
+          .send({ key: "value" });  
+      expect(res.status).toBe(400);
   });
 });
