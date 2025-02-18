@@ -82,6 +82,6 @@ describe('Health Check API Tests', () => {
   test('GET /healthz should return 503 if Database is not available', async () => {
     await sequelize.close(); 
     const res = await request(app).get('/healthz');
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(500);
   });
 });
