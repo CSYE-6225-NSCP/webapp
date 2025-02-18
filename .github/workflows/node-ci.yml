@@ -1,13 +1,12 @@
 name: node-flow
 
 on:
-  workflow_dispatch:
-  push:
+  pull_request:
     branches:
-       - main
+      - main
 
 jobs:
-  integration-test:
+  build:
     runs-on: ubuntu-latest
 
     services:
@@ -20,18 +19,18 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Checkout Code
+      - name: checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "16"
 
-      - name: Install Dependencies
+      - name: install dependencies
         run: npm install
 
-      - name: Wait for MySQL to Start
+      - name: Wait for MySQL to start
         run: |
           echo "Waiting for MySQL to start..."
           while ! mysqladmin ping -h 127.0.0.1 --silent; do
@@ -39,19 +38,19 @@ jobs:
           done
           echo "MySQL is up and running!"
 
-      - name: Create Database
+      - name: create database
         run: |
           mysql -h 127.0.0.1 --port 3306 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS healthDB;"
 
-      - name: Verify Database Creation
+      - name: verify database creation
         run: |
           mysql -h 127.0.0.1 --port 3306 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
-      - name: Run Integration Tests
+      - name: Run tests   
         env:
           SQL_PSWD: "${{ secrets.SQL_PSWD_TEST }}"
           DATABASE: "healthDB"
           DIALECT: "mysql"
           SQL_USER: "${{ secrets.SQL_USER_TEST }}"
           HOST: 127.0.0.1
-        run: npm run test:integration
+        run: npm test
