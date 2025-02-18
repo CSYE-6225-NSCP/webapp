@@ -1,89 +1,87 @@
-const request = require("supertest");
-const { app } = require("../app"); 
-const { HealthCheck, sequelize } = require("../src/models/model"); 
+const request = require('supertest');
+const { app } = require('../app');
+const { sequelize, HealthCheck } = require('../src/models/model');
 
-jest.mock("../src/models/model");
-
-beforeAll(async () => {
-  await sequelize.authenticate();
-});
-
-afterAll(async () => {
-  await sequelize.close();
-});
-
-describe("Health Check API Tests", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('Health Check API Tests', () => {
+  beforeAll(async () => {
+    await sequelize.authenticate();
+    await sequelize.sync({ force: true }); 
   });
 
-  test("GET /healthz should return 200 OK", async () => {
-    HealthCheck.create.mockResolvedValue({});
-    const res = await request(app).get("/healthz");
-    expect(res.status).toBe(200);
+  afterAll(async () => {
+    await sequelize.close(); 
   });
 
-  test("GET /healthz should return 503 if Database server is stopped", async () => {
-    HealthCheck.create.mockRejectedValue(new Error("Database error"));
-    const res = await request(app).get("/healthz");
-    expect(res.status).toBe(503);
+  beforeEach(async () => {
+    await sequelize.sync({ force: true }); 
   });
 
-  test("POST /healthz should return 405 Method Not Allowed", async () => {
-    const res = await request(app).post("/healthz");
+  test('GET /healthz should return 200 OK', async () => {
+    await HealthCheck.create({});
+    const res = await request(app).get('/healthz');
+    expect(res.statusCode).toBe(200);
+  });
+
+
+  test('POST /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).post('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("PUT /healthz should return 405 Method Not Allowed", async () => {
-    const res = await request(app).put("/healthz");
+  test('PUT /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).put('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("DELETE /healthz should return 405 Method Not Allowed", async () => {
-    const res = await request(app).delete("/healthz");
+  test('DELETE /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).delete('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("PATCH /healthz should return 405 Method Not Allowed", async () => {
-    const res = await request(app).patch("/healthz");
+  test('PATCH /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).patch('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("GET /healthz with body should return 400 Bad Request", async () => {
-    const res = await request(app).get("/healthz").send({ key: "value" });
+  test('GET /healthz with body should return 400 Bad Request', async () => {
+    const res = await request(app).get('/healthz').send({ key: 'value' });
     expect(res.status).toBe(400);
   });
 
-  test("OPTIONS /healthz should return 405 Method Not Allowed", async () => {
-    const res = await request(app).options("/healthz");
+  test('OPTIONS /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).options('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("HEAD /healthz should return 405 Method Not allowed", async () => {
-    const res = await request(app).head("/healthz");
+  test('HEAD /healthz should return 405 Method Not Allowed', async () => {
+    const res = await request(app).head('/healthz');
     expect(res.status).toBe(405);
   });
 
-  test("GET /healthz with query params should return 400 Bad Request", async () => {
-    const res = await request(app).get("/healthz?param=value");
+  test('GET /healthz with query params should return 400 Bad Request', async () => {
+    const res = await request(app).get('/healthz?param=value');
     expect(res.status).toBe(400);
-
   });
 
-  test("GET /healthz with XML should return 405 Method Not Allowed", async () => {
+  test('GET /healthz with XML should return 400 Bad Request', async () => {
     const res = await request(app)
-        .get("/healthz")  
-        .set("Content-Type", "application/xml")  
-        .send("<root><key>value</key></root>");  
-
+      .get('/healthz')  
+      .set('Content-Type', 'application/xml')  
+      .send('<root><key>value</key></root>');  
     expect(res.status).toBe(400);
-});
+  });
 
-    test("GET /healthz with JSON should return 405 Method Not Allowed", async () => {
-      const res = await request(app)
-          .get("/healthz")  
-          .set("Content-Type", "application/json")  
-          .send({ key: "value" });  
-      expect(res.status).toBe(400);
+  test('GET /healthz with JSON should return 400 Bad Request', async () => {
+    const res = await request(app)
+      .get('/healthz')  
+      .set('Content-Type', 'application/json')  
+      .send({ key: 'value' });  
+    expect(res.status).toBe(400);
+  });
+
+  test('GET /healthz should return 503 if Database is not available', async () => {
+    await sequelize.close(); 
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(503);
   });
 });
