@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql:8.0.36
+        image: mysql:latest
         env:
           MYSQL_DATABASE: ${{ secrets.DB_NAME }}
           MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
