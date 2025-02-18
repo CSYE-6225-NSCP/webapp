@@ -16,7 +16,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         ports:
           - 3306/tcp
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }}" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: checkout code
@@ -30,21 +30,37 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: Wait for MySQL to start
+      - name: Wait for MySQL to start (Improved)
         run: |
-          echo "Waiting for MySQL to start..."
-          while ! mysqladmin ping -h 127.0.0.1 --silent; do
-            sleep 1
+          echo "Waiting for MySQL to be available..."
+          RETRIES=30
+          while ! mysqladmin ping -h 127.0.0.1 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} --silent; do
+            ((RETRIES--))
+            if [ $RETRIES -le 0 ]; then
+              echo "MySQL did not start in time. Exiting."
+              exit 1
+            fi
+            echo "MySQL is not ready yet... retrying in 2s."
+            sleep 2
           done
           echo "MySQL is up and running!"
 
+      - name: Debug MySQL Connection
+        run: |
+          echo "Checking MySQL service status..."
+          systemctl status mysql || echo "Systemd not available"
+          echo "Checking MySQL process..."
+          ps aux | grep mysql
+          echo "Testing MySQL login..."
+          mysql -h 127.0.0.1 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT version();"
+
       - name: create database
         run: |
-          mysql -h 127.0.0.1 --port 3306 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS healthDB;"
+          mysql -h 127.0.0.1 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS healthDB;"
 
       - name: verify database creation
         run: |
-          mysql -h 127.0.0.1 --port 3306 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+          mysql -h 127.0.0.1 -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: Run tests   
         env:
