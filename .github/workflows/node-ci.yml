@@ -6,24 +6,30 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: test_db
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=$MYSQL_USER --password=$MYSQL_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
@@ -31,25 +37,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install MySQL client
+      - name: Wait for MySQL to be ready
         run: |
-          sudo apt-get update
-          sudo apt-get install -y mysql-client
-
-      - name: Set up database
-        env:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_PORT: 3306
-        run: |
-          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS test_db;"
-          mysql -h $MYSQL_HOST -P $MYSQL_PORT -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} test_db < ./path/to/your/schema.sql
+          until mysqladmin ping -h "127.0.0.1" --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
       - name: Run tests
         env:
           DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: root
-          DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          DB_NAME: test_db
+          DB_USER: ${{ secrets.MYSQL_USER }}
+          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          DB_NAME: ${{ secrets.MYSQL_DATABASE }}
         run: npm test
-
