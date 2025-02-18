@@ -76,6 +76,13 @@ To start/stop mysql server : `sudo /usr/local/mysql-9.2.0-macos15-arm64/support-
 * get, options, post, put, delete, params, header, database server down, patch, head, xml, json
 
 
+**CONTINUOS INTEGRATION**
+
+* The flow checks the tests and download the mysql integration with setting up the database 
+* It installs the node and setup the node
+* After setting up it creates the database and user and perform the tests
+* If all the tests are passed then it allows to merge the request.
+
 
 
 
