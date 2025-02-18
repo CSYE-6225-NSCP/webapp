@@ -28,16 +28,16 @@ jobs:
 
 
       - name: Install Node.js Dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Wait for MySQL to be ready
+      - name: Waiting  MySQL to be ready
         run: |
           until mysqladmin ping -h"127.0.0.1" --silent; do
             echo "Waiting for MySQL..."
             sleep 2
           done
 
-      - name: Setup MySQL Database and User
+      - name: configuring MySQL Database and the User
         env:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -54,5 +54,4 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
-          NODE_ENV: test
         run: npm test
