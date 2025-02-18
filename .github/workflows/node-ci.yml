@@ -1,29 +1,62 @@
 name: node-flow
 
 on:
-  pull_request:
+  pull_request: 
     branches:
-        - main
-        
+      - main
+
 jobs:
-    build:
-       runs-on: ubuntu-latest
+  build:
+    name: WebApp Setup
+    runs-on: ubuntu-latest
 
-       steps:
-        - name: checkout code
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-        - name: checkout version and install
-          uses: actions/setup-node@v3
-          with:
-            node-version: '16'
-
-        - name: install dependencies
-          run: npm install
-
-        - name: Run tests   
-          run: npm test
-
-
+      - name: Configure MySQL
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo systemctl start mysql
+          sudo systemctl status mysql
+          sudo systemctl enable mysql
         
+      - name: Set up environment variables
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DIALECT: ${{ secrets.DIALECT }}
+          PORT: ${{ secrets.PORT }}
+        run: |
+          echo "DATABASE_HOST=$DATABASE_HOST" >> .env
+          echo "DATABASE_NAME=$DATABASE_NAME" >> .env
+          echo "DATABASE_PASSWORD=$DATABASE_PASSWORD" >> .env
+          echo "DATABASE_PORT=$DATABASE_PORT" >> .env
+          echo "DATABASE_USERNAME=$DATABASE_USERNAME" >> .env
+          echo "DIALECT=$DIALECT" >> .env
+          echo "PORT=$PORT" >> .env
+          cat .env
+      
+      - name: Grant Privileges (Corrected and Secure)
+        run: |
+          mysql -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -h localhost -e "GRANT ALL PRIVILEGES ON ${{ secrets.DATABASE_NAME }}.* TO '${{ secrets.DATABASE_USERNAME }}'@'localhost' IDENTIFIED BY '${{ secrets.DATABASE_PASSWORD }}';"
+          mysql -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} -h localhost -e "FLUSH PRIVILEGES;"
 
+      - name: Configuring Database
+        run: |
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DATABASE_NAME }};"
+          sudo mysql -e "ALTER USER ${{ secrets.DATABASE_USERNAME }}@${{ secrets.DATABASE_HOST }} IDENTIFIED BY ${{ secrets.DATABASE_PASSWORD }};"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+
+      - name: Install Dependencies
+        run: |
+          cd src
+          npm install
+      
+      - name: Run Tests
+        working-directory: src
+        run: npx jest
