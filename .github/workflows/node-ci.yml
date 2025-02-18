@@ -15,7 +15,15 @@ jobs:
 
       - name: Install MySQL
         run: |
+          sudo apt update -y
+          sudo apt upgrade -y
           sudo DEBIAN_FRONTEND=noninteractive apt install -y mysql-server
+          
+          # Ensure MySQL directory exists
+          sudo mkdir -p /var/run/mysqld
+          sudo chown -R mysql:mysql /var/run/mysqld
+          
+          # Start MySQL service
           sudo systemctl start mysql
           sudo systemctl enable mysql
 
