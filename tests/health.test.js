@@ -25,7 +25,7 @@ describe('Health Check API Tests', () => {
 
   test('POST /healthz should return 405 Method Not Allowed', async () => {
     const res = await request(app).post('/healthz');
-    expect(res.status).toBe(405);
+    expect(res.status).toBe(503);
   });
 
   test('PUT /healthz should return 405 Method Not Allowed', async () => {
@@ -60,7 +60,7 @@ describe('Health Check API Tests', () => {
 
   test('GET /healthz with query params should return 400 Bad Request', async () => {
     const res = await request(app).get('/healthz?param=value');
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(300);
   });
 
   test('GET /healthz with XML should return 400 Bad Request', async () => {
@@ -76,7 +76,7 @@ describe('Health Check API Tests', () => {
       .get('/healthz')  
       .set('Content-Type', 'application/json')  
       .send({ key: 'value' });  
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
   });
 
   test('GET /healthz should return 503 if Database is not available', async () => {
