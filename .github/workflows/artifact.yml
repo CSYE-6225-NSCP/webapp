@@ -92,7 +92,7 @@ jobs:
           path: webapp/
 
       - name: Clean Workspace
-        run: rm -rf packer/
+        run: rm -rf packer_1.11.2_linux_amd64.zip 
 
       - name: Install Packer
         run: |
@@ -114,6 +114,7 @@ jobs:
 
       - name: Create `.env` file
         run: |
+          mkdir packer
           echo "DB_HOST=${{ secrets.DB_HOST }}" > packer/.env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> packer/.env
           echo "DB_USER=${{ secrets.DB_USER }}" >> packer/.env
