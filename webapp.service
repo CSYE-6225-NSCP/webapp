@@ -1,0 +1,19 @@
+[Unit]
+Description=Node.js Application
+ConditionPathExists=/opt/webapp/.env
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=csye6225
+Group=csye6225
+WorkingDirectory=/opt/webapp/webapp-main
+EnvironmentFile=/opt/webapp/.env
+ExecStart=/usr/bin/node /opt/webapp/webapp-main/app.js
+Restart=always
+SyslogIdentifier=webapp
+StandardOutput=append:/var/log/webapp.log
+StandardError=append:/var/log/webapp-error.log
+
+[Install]
+WantedBy=multi-user.target
