@@ -82,29 +82,29 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "../webapp.zip"
+    source      = "webapp.zip"
     destination = "/tmp/"
   }
 
   provisioner "file" {
     source      = ".env"
-    destination = "/opt/webapp/.env"
+    destination = "/opt/webapp/webapp-main/.env"
   }
 
   provisioner "file" {
-    source      = "../webapp.service"
-    destination = "/tmp/webapp.service"
+    source      = "./webapp.service"
+    destination = "/tmp/"
   }
 
   provisioner "shell" {
-    script = "./db.sh"
+    script = "db.sh"
   }
 
   provisioner "shell" {
-    script = "./node.sh"
+    script = "node.sh"
   }
 
   provisioner "shell" {
-    script = "./init.sh"
+    script = "init.sh"
   }
 }
