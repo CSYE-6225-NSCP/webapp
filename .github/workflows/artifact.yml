@@ -123,8 +123,7 @@ jobs:
           echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> packer/.env
 
       - name: Run Packer Commands
-        working-directory: packer
         run: |
-          packer init .
-          packer validate .
-          packer build .
+          packer init csye-packer.pkr.hcl
+          packer validate csye-packer.pkr.hcl
+          packer build csye-packer.pkr.hcl
