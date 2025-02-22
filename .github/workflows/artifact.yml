@@ -125,6 +125,6 @@ jobs:
       - name: Run Packer Commands
         working-directory: packer
         run: |
-          packer init packer.pkr.hcl
-          packer validate packer.pkr.hcl
-          packer build packer.pkr.hcl
+          packer init .
+          packer validate .
+          packer build .
