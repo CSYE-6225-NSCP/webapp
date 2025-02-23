@@ -89,34 +89,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webapp-artifact
-          path: .
-
-      - name: Clean Workspace
-        run: rm -rf packer_1.11.2_linux_amd64.zip 
+          path: packer/
 
       - name: Install Packer
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip
-          rm -rf packer packer_1.11.2_linux_amd64.zip
-          curl -LO https://releases.hashicorp.com/packer/1.11.2/packer_1.11.2_linux_amd64.zip
-          unzip -o packer_1.11.2_linux_amd64.zip
-          sudo mv packer /usr/local/bin/
-          packer --version
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Ensure packer directory exists
-        run: mkdir -p packer
-
-      - name: Move webapp.zip to correct location
-        run: 
-          mv webapp.zip packer/
+        uses: hashicorp/setup-packer@main
 
       - name: Create `.env` file in packer directory
         run: |
@@ -128,16 +104,13 @@ jobs:
           echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> packer/.env
 
       - name: Run `packer init`
-        working-directory: packer
-        id: init
-        run: packer init AMI/csye-packer.pkr.hcl
+        working-directory: AMI
+        run: packer init csye-packer.pkr.hcl
 
       - name: Run `packer validate`
-        working-directory: packer
-        id: validate
-        run: packer validate AMI/csye-packer.pkr.hcl
+        working-directory: AMI
+        run: packer validate csye-packer.pkr.hcl
 
       - name: Build AMI
-        working-directory: packer
-        run: |
-          packer build AMI/csye-packer.pkr.hcl
+        working-directory: AMI
+        run: packer build csye-packer.pkr.hcl
