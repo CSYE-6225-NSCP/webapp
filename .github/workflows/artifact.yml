@@ -130,14 +130,14 @@ jobs:
       - name: Run `packer init`
         working-directory: packer
         id: init
-        run: cd packer && packer init csye-packer.pkr.hcl
+        run: packer init packer/csye-packer.pkr.hcl
 
       - name: Run `packer validate`
         working-directory: packer
         id: validate
-        run: cd packer && packer validate csye-packer.pkr.hcl
+        run: packer validate packer/csye-packer.pkr.hcl
 
       - name: Build AMI
         working-directory: packer
         run: |
-          cd packer && packer build csye-packer.pkr.hcl
+          packer build packer/csye-packer.pkr.hcl
