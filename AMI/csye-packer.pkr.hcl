@@ -88,7 +88,7 @@ build {
 
   provisioner "file" {
     source      = ".env"
-    destination = "/opt/webapp/webapp-main/.env"
+    destination = "tmp/.env"
   }
 
   provisioner "file" {
