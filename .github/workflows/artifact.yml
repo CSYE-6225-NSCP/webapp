@@ -78,7 +78,7 @@ jobs:
 
       - name: Create webapp.zip
         run: |
-          zip -r webapp.zip ./*
+          zip -r webapp.zip .
 
       - name: Run Integration Tests
         run: npm test
