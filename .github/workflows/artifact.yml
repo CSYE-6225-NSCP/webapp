@@ -111,8 +111,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Ensure packer directory exists
+        run: mkdir -p packer
+
       - name: Move webapp.zip to correct location
-        run: mv webapp.zip packer/
+        run: 
+          mv webapp.zip packer/
 
       - name: Create `.env` file in packer directory
         run: |
@@ -124,13 +128,16 @@ jobs:
           echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> packer/.env
 
       - name: Run `packer init`
+        working-directory: packer
         id: init
-        run: packer init csye6225-aws.pkr.hcl
+        run: packer init csye-packer.pkr.hcl
 
       - name: Run `packer validate`
+        working-directory: packer
         id: validate
-        run: packer validate csye6225-aws.pkr.hcl
+        run: packer validate csye-packer.pkr.hcl
 
       - name: Build AMI
+        working-directory: packer
         run: |
-          packer build csye6225-aws.pkr.hcl
+          packer build csye-packer.pkr.hcl
