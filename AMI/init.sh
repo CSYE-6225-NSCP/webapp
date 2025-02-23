@@ -19,7 +19,8 @@ sudo unzip /tmp/webapp.zip -d /opt/webapp
 } | sudo tee /opt/webapp/.env
 
 
-cd /opt/webapp && sudo npm install --omit=dev
+cd /opt/webapp
+sudo npm install --omit=dev
 
 sudo chown -R csye6225:csye6225 /opt/webapp
 
