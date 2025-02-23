@@ -36,10 +36,10 @@ jobs:
           zip -r webapp.zip .
         shell: bash
 
-      - name: Upload webapp.zip to Packer Working Directory
+      - name: Prepare Packer Files
         run: |
-          mv webapp.zip AMI/webapp.zip
-        shell: bash
+          mkdir -p AMI/files  
+          mv webapp.zip AMI/files/  
 
       - name: Initialize packer
         working-directory: AMI

@@ -76,11 +76,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Application Artifact
+      - name: Create webapp.zip
         run: |
-          npm install
-          npm run build
-          zip -r webapp.zip . -x .git/\* node_modules/\* tests/\* AMI/\* scripts/\* .github/\*
+          zip -r webapp.zip ./*
 
       - name: Run Integration Tests
         run: npm test
