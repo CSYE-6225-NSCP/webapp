@@ -85,12 +85,10 @@ build {
     source      = "webapp.zip"
     destination = "/tmp/webapp.zip"
   }
-  provisioner "shell" {
-  inline = ["mkdir -p /opt/webapp"]
-}
+
   provisioner "file" {
     source      = ".env"
-    destination = "/opt/webapp/.env"
+    destination = "tmp/.env"
   }
 
   provisioner "file" {
