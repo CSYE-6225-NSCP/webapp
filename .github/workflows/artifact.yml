@@ -78,15 +78,21 @@ jobs:
 
       - name: Build Application Artifact
         run: |
-            npm install
-            npm run build
-            zip -r webapp.zip . -x .git/\* node_modules/\*
+          npm install
+          npm run build
+          zip -r webapp.zip . -x .git/\* node_modules/\* tests/\* AMI/\* scripts/\* .github/\*
 
       - name: Run Integration Tests
         run: npm test
 
       - name: Install Packer
         uses: hashicorp/setup-packer@main
+
+      - name: Prepare Packer Files
+        run: |
+          mkdir -p AMI/files
+          mv webapp.zip AMI/files/
+          cp webapp.service AMI/
 
 
       - name: Run `packer init`
