@@ -76,15 +76,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create webapp.zip
-        run: |
-          zip -r webapp.zip .
 
       - name: Run Integration Tests
         run: npm test
 
       - name: Install Packer
         uses: hashicorp/setup-packer@main
+
+      - name: Create webapp.zip
+        run: |
+          zip -r webapp.zip src package.json package-lock.json AMI app.js scripts tests
 
       - name: Prepare Packer Files
         run: |
