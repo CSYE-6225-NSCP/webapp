@@ -50,15 +50,6 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
         run: npm test
 
-      - name: Build Application Artifact
-        run: zip -r webapp.zip ./*
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp-artifact
-          path: webapp.zip
-
   packer-build:
     needs: build
     runs-on: ubuntu-latest
@@ -74,28 +65,29 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_DIALECT: ${{ secrets.DB_DIALECT }}
+      DB_LOGGING: ${{ secrets.DB_LOGGING }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT}}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Download Application Artifact
-        uses: actions/download-artifact@v4
+      - name: Configure AWS Creds
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: webapp-artifact
-          path: AMI/
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Build Application Artifact
+        run: |
+            npm install
+            npm run build
+            zip -r webapp.zip . -x .git/\* node_modules/\*
+
+      - name: Run Integration Tests
+        run: npm test
 
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
-      - name: Create `.env` file in packer directory
-        run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" > AMI/.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> AMI/.env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> AMI/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> AMI/.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> AMI/.env
-          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> AMI/.env
 
       - name: Run `packer init`
         working-directory: AMI
@@ -103,8 +95,22 @@ jobs:
 
       - name: Run `packer validate`
         working-directory: AMI
-        run: packer validate csye-packer.pkr.hcl
+        run: packer validate csye-packer.pkr.hcl 
 
       - name: Build AMI
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_DIALECT: ${{ secrets.DB_DIALECT }}
+          DB_LOGGING: ${{ secrets.DB_LOGGING }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
         working-directory: AMI
-        run: packer build csye-packer.pkr.hcl
+        run: |
+          packer build csye-packer.pkr.hcl

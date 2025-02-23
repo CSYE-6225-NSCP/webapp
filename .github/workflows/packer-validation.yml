@@ -1,0 +1,62 @@
+name: Packer status check workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+ 
+jobs:
+  test:
+    name: Packer Workflow
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      INSTANCE_TYPE: ${{ secrets.INSTANCE_TYPE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_DIALECT: ${{ secrets.DB_DIALECT }}
+      DB_LOGGING: ${{ secrets.DB_LOGGING }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT}}
+ 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+ 
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+
+      - name: Create webapp.zip from existing directory
+        run: |
+          zip -r webapp.zip .
+        shell: bash
+
+      - name: Upload webapp.zip to Packer Working Directory
+        run: |
+          mv webapp.zip AMI/webapp.zip
+        shell: bash
+
+      - name: Initialize packer
+        working-directory: AMI
+        run: |
+          packer init csye-packer.pkr.hcl
+        shell: bash
+        
+ 
+      - name: Format packer
+        working-directory: AMI
+        run: |
+          packer fmt -check csye-packer.pkr.hcl
+        continue-on-error: false
+        shell: bash
+        
+      - name: Validate Packer
+        working-directory: AMI
+        run: |
+          packer validate csye-packer.pkr.hcl
+        shell: bash
