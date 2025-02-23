@@ -30,12 +30,6 @@ jobs:
       - name: Install Node.js Dependencies
         run: npm install
 
-      - name: Waiting for MySQL to be ready
-        run: |
-          until mysqladmin ping -h"127.0.0.1" --silent; do
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
 
       - name: Configuring MySQL Database and User
         env:
@@ -57,7 +51,7 @@ jobs:
         run: npm test
 
       - name: Build Application Artifact
-        run: zip -r webapp.zip src package.json package-lock.json webapp.service db.sh node.sh init.sh
+        run: zip -r webapp.zip ./*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -85,6 +79,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with: 
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Download Application Artifact
         uses: actions/download-artifact@v4
         with:
@@ -95,13 +96,14 @@ jobs:
         uses: hashicorp/setup-packer@main
 
       - name: Create `.env` file in packer directory
+        working-directory: src
         run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" > AMI/.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> AMI/.env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> AMI/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> AMI/.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> AMI/.env
-          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> AMI/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> .env
 
       - name: Run `packer init`
         working-directory: AMI
