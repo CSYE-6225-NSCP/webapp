@@ -89,19 +89,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webapp-artifact
-          path: packer/
+          path: AMI/
 
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
       - name: Create `.env` file in packer directory
         run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" > packer/.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> packer/.env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> packer/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> packer/.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> packer/.env
-          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> packer/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > AMI/.env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> AMI/.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> AMI/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> AMI/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> AMI/.env
+          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> AMI/.env
 
       - name: Run `packer init`
         working-directory: AMI
