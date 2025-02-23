@@ -80,14 +80,15 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
-      - name: Create webapp.zip
+      - name: Create webapp.zip from existing directory
         run: |
-          zip -r webapp.zip src package.json package-lock.json AMI app.js scripts tests
+          zip -r webapp.zip .
+        shell: bash
 
       - name: Prepare Packer Files
         run: |
           mkdir -p AMI/files
-          mv webapp.zip AMI/files/
+          mv webapp-main.zip AMI/files/
           cp webapp.service AMI/
 
 
