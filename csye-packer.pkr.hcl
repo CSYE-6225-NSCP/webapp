@@ -2,7 +2,7 @@ packer {
   required_plugins {
     amazon = {
       version = ">= 1.2.8, <2.0.0"
-      source  = "github.com/hashicorp/amazon"
+      source  = "hashicorp/amazon"
     }
   }
 }
@@ -73,7 +73,7 @@ source "amazon-ebs" "ubuntu" {
   launch_block_device_mappings {
     device_name           = "/dev/sda1"
     volume_size           = 25
-    volume_type           = "gp2"
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 }
@@ -83,7 +83,7 @@ build {
 
   provisioner "file" {
     source      = "webapp.zip"
-    destination = "/tmp/"
+    destination = "/tmp/webapp.zip"
   }
 
   provisioner "file" {

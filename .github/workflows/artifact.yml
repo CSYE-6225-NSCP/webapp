@@ -57,7 +57,7 @@ jobs:
         run: npm test
 
       - name: Build Application Artifact
-        run: zip -r webapp.zip .
+        run: zip -r webapp.zip src package.json package-lock.json webapp.service db.sh node.sh init.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -89,7 +89,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webapp-artifact
-          path: webapp/
+          path: .
 
       - name: Clean Workspace
         run: rm -rf packer_1.11.2_linux_amd64.zip 
@@ -104,7 +104,6 @@ jobs:
           sudo mv packer /usr/local/bin/
           packer --version
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -112,9 +111,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create `.env` file
+      - name: Move webapp.zip to correct location
+        run: mv webapp.zip packer/
+
+      - name: Create `.env` file in packer directory
         run: |
-          mkdir packer
           echo "DB_HOST=${{ secrets.DB_HOST }}" > packer/.env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> packer/.env
           echo "DB_USER=${{ secrets.DB_USER }}" >> packer/.env
@@ -122,8 +123,14 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> packer/.env
           echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> packer/.env
 
-      - name: Run Packer Commands
+      - name: Run `packer init`
+        id: init
+        run: packer init csye6225-aws.pkr.hcl
+
+      - name: Run `packer validate`
+        id: validate
+        run: packer validate csye6225-aws.pkr.hcl
+
+      - name: Build AMI
         run: |
-          packer init csye-packer.pkr.hcl
-          packer validate csye-packer.pkr.hcl
-          packer build csye-packer.pkr.hcl
+          packer build csye6225-aws.pkr.hcl
