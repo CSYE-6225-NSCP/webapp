@@ -31,6 +31,11 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
+      - name: Create webapp.zip from existing directory
+        run: |
+          zip -r webapp.zip .
+        shell: bash
+
       - name: Initialize packer
         working-directory: AMI
         run: |
