@@ -1,10 +1,5 @@
 #!/bin/bash
 
-
-DB_PASSWORD="chaitanya"  
-DB_NAME="healthdb"        
-DB_USER="root"       
-
 sudo apt update -y
 sudo apt upgrade -y
 sudo apt-get install -y apt-utils
@@ -28,13 +23,10 @@ y
 EOF
 
 sudo mysql --user=root <<EOF
--- Set root password
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD';
 
--- Create database
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;
 
--- Create user and grant privileges
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
 GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';
 
