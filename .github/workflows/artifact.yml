@@ -69,6 +69,9 @@ jobs:
       SERVER_PORT: ${{ secrets.SERVER_PORT}}
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Configure AWS Creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -88,7 +91,7 @@ jobs:
       - name: Prepare Packer Files
         run: |
           mkdir -p AMI/files
-          mv webapp-main.zip AMI/files/
+          mv webapp.zip AMI/files/
           cp webapp.service AMI/
 
 
