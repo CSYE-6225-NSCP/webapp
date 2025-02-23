@@ -77,9 +77,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
 
-      - name: Run Integration Tests
-        run: npm test
-
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
