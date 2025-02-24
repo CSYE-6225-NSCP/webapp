@@ -130,7 +130,7 @@ source "amazon-ebs" "ubuntu" {
 source "googlecompute" "ubuntu" {
   project_id            = var.gcp_project_id
   source_image_family   = "ubuntu-2204-lts"
-  image_name            = "csye6225-${var.assg_name}-${timestamp()}"
+  image_name            = "csye6225-${var.assg_name}-${formatdate("YYYYMMDDhhmmss", timestamp())}"
   image_family          = "custom-images"
   service_account_email = var.service_account_email
   zone                  = var.gcp_zone
