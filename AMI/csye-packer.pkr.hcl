@@ -4,8 +4,29 @@ packer {
       version = ">= 1.2.8, <2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
+    googlecompute = {
+      version = ">= 1.1.4"
+      source  = "github.com/hashicorp/googlecompute"
+    }
   }
 }
+
+
+variable "gcp_project_id" {
+  type    = string
+  default = env("GCP_PROJECT_ID")
+}
+
+variable "gcp_zone" {
+  type    = string
+  default = "us-central1-a"
+}
+
+variable "service_account_email" {
+  type    = string
+  default = env("GCP_SERVICE_ACCOUNT_EMAIL")
+}
+
 
 variable "aws_region" {
   type    = string
@@ -106,9 +127,18 @@ source "amazon-ebs" "ubuntu" {
 
   ami_users = []
 }
+source "googlecompute" "ubuntu" {
+  project_id            = var.gcp_project_id
+  source_image_family   = "ubuntu-2204-lts"
+  image_name            = "csye6225-${var.assg_name}-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  image_family          = "custom-images"
+  service_account_email = var.service_account_email
+  zone                  = var.gcp_zone
+  ssh_username          = "packer"
+}
 
 build {
-  sources = ["source.amazon-ebs.ubuntu"]
+  sources = ["source.amazon-ebs.ubuntu", "source.googlecompute.ubuntu"]
 
   provisioner "file" {
     source      = "./files/webapp.zip"
