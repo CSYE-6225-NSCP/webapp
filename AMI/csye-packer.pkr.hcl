@@ -106,7 +106,7 @@ variable "AWS_DEMO_ACCOUNT_ID" {
 
 variable "GCP_DEMO_PROJECT_ID" {
   type    = string
-  default =  env("GCP_DEMO_PROJECT_ID")
+  default = env("GCP_DEMO_PROJECT_ID")
 }
 
 
