@@ -132,7 +132,7 @@ source "googlecompute" "ubuntu" {
   source_image_family   = "ubuntu-2204-lts"
   image_name            = "csye6225-${var.assg_name}-${timestamp()}"
   image_family          = "custom-images"
-  service_account_email = env("GCP_SERVICE_ACCOUNT_EMAIL")
+  service_account_email = var.service_account_email
   zone                  = var.gcp_zone
   ssh_username          = "packer"
 }
