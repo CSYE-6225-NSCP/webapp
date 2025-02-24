@@ -98,6 +98,13 @@ variable "DB_PORT" {
   default = env("DB_PORT")
 }
 
+
+variable "AWS_DEMO_ACCOUNT_ID" {
+  type    = string
+  default = env("AWS_DEMO_ACCOUNT_ID")
+}
+
+
 source "amazon-ebs" "ubuntu" {
   ami_name        = "csye6225_${var.assg_name}_${formatdate("YYYY_MM_DD_hh_mm_ss", timestamp())}"
   instance_type   = var.instance_type
@@ -125,7 +132,7 @@ source "amazon-ebs" "ubuntu" {
     delete_on_termination = true
   }
 
-  ami_users = []
+  ami_users = [var.AWS_DEMO_ACCOUNT_ID]
 }
 source "googlecompute" "ubuntu" {
   project_id            = var.gcp_project_id

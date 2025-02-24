@@ -26,6 +26,25 @@ sudo npm install --omit=dev
 
 sudo chown -R csye6225:csye6225 /opt/webapp
 
+if command -v apt-get &>/dev/null; then
+    sudo apt-get remove --purge -y git && sudo apt-get autoremove -y
+elif command -v yum &>/dev/null; then
+    sudo yum remove -y git && sudo yum autoremove -y
+elif command -v dnf &>/dev/null; then
+    sudo dnf remove -y git
+elif command -v zypper &>/dev/null; then
+    sudo zypper remove -y git
+elif command -v snap &>/dev/null; then
+    sudo snap remove git
+else
+    echo "No supported package manager found. Skipping Git removal."
+fi
+
+if command -v git &>/dev/null; then
+    echo "Git still exists, removing manually..."
+    sudo rm -rf /usr/bin/git /usr/local/bin/git
+fi
+
 sudo mv /tmp/webapp.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
