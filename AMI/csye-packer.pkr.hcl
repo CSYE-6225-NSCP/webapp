@@ -104,11 +104,6 @@ variable "AWS_DEMO_ACCOUNT_ID" {
   default = env("AWS_DEMO_ACCOUNT_ID")
 }
 
-variable "GCP_DEMO_PROJECT_ID" {
-  type    = string
-  default = env("GCP_DEMO_PROJECT_ID")
-}
-
 
 source "amazon-ebs" "ubuntu" {
   ami_name        = "csye6225_${var.assg_name}_${formatdate("YYYY_MM_DD_hh_mm_ss", timestamp())}"
@@ -147,7 +142,6 @@ source "googlecompute" "ubuntu" {
   service_account_email = var.service_account_email
   zone                  = var.gcp_zone
   ssh_username          = "packer"
-  image_permissions     = ["projects/${var.GCP_DEMO_PROJECT_ID}"]
 }
 
 build {
