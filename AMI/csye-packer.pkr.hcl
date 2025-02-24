@@ -147,7 +147,7 @@ source "googlecompute" "ubuntu" {
   service_account_email = var.service_account_email
   zone                  = var.gcp_zone
   ssh_username          = "packer"
-  image_users           = ["projects/${var.GCP_DEMO_PROJECT_ID}"]
+  image_permissions     = ["projects/${var.GCP_DEMO_PROJECT_ID}"]
 }
 
 build {
