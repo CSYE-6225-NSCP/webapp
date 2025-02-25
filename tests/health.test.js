@@ -19,7 +19,7 @@ describe('Health Check API Tests', () => {
   test('GET /healthz should return 200 OK', async () => {
     await HealthCheck.create({});
     const res = await request(app).get('/healthz');
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(400);
   });
 
 
