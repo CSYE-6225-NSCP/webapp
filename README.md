@@ -11,10 +11,10 @@
 
 Techstack used for API : 
                  
-                 javascript(node.js), 
-                 sequelize(ORM), 
-                 mysql, 
-                 Postman/curl for testing
+javascript(node.js), 
+sequelize(ORM), 
+mysql, 
+Postman/curl for testing
 
 `it will return 200 http status code for succesfull operation which is GET for end point \healthz`
 
