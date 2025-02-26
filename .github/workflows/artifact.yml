@@ -105,15 +105,16 @@ jobs:
         run: |
           IMAGE_NAME=$(gcloud compute images list \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --filter="name~'csye6225-${{ vars.ASSG_NAME }}-'" \
+            --filter="name~'csye6225-${{ vars.ASSG_NAME }}'" \
             --sort-by=~creationTimestamp \
-            --format="value(name)" \
-            --limit=1)
+            --limit=1 \
+            --format="value(name)")
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Share Image with Demo Project
         run: |
-          gcloud compute images add-iam-policy-binding $IMAGE_NAME \
+          gcloud compute images add-iam-policy-binding \
+            ${{ steps.latest_image.outputs.IMAGE_NAME }} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --member="projectEditor:${{ secrets.GCP_DEMO_PROJECT_ID }}" \
+            --member="serviceAccount:${{ secrets.GCP_DEMO_PROJECT_ID }}@cloudservices.gserviceaccount.com" \
             --role="roles/compute.imageUser"
-        shell: bash
