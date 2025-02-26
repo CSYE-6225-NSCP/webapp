@@ -5,7 +5,7 @@ packer {
       source  = "github.com/hashicorp/amazon"
     }
     googlecompute = {
-      version = ">= 1.1.4"
+      version = ">= 1.1.0"
       source  = "github.com/hashicorp/googlecompute"
     }
   }
@@ -102,6 +102,11 @@ variable "DB_PORT" {
 variable "AWS_DEMO_ACCOUNT_ID" {
   type    = string
   default = env("AWS_DEMO_ACCOUNT_ID")
+}
+
+variable "GCP_DEMO_PROJECT_ID" {
+  type    = string
+  default = env("GCP_DEMO_PROJECT_ID")
 }
 
 
