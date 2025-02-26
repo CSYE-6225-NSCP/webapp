@@ -5,7 +5,7 @@ packer {
       source  = "github.com/hashicorp/amazon"
     }
     googlecompute = {
-      version = ">= 1.1.4"
+      version = ">= 1.1.0"
       source  = "github.com/hashicorp/googlecompute"
     }
   }
@@ -147,7 +147,6 @@ source "googlecompute" "ubuntu" {
   service_account_email = var.service_account_email
   zone                  = var.gcp_zone
   ssh_username          = "packer"
-  image_projects        = [var.GCP_PROJECT_ID, var.GCP_DEMO_PROJECT_ID]
 }
 
 build {

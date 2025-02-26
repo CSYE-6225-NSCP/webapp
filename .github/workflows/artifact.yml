@@ -98,3 +98,22 @@ jobs:
           GCP_DEMO_PROJECT_ID: ${{ secrets.GCP_DEMO_PROJECT_ID }}
         run: |
           packer build -parallel-builds=2 csye-packer.pkr.hcl
+
+
+      - name: Get latest image name
+        id: latest_image
+        run: |
+          IMAGE_NAME=$(gcloud compute images list \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --filter="name~'csye6225-${{ vars.ASSG_NAME }}-'" \
+            --sort-by=~creationTimestamp \
+            --format="value(name)" \
+            --limit=1)
+
+      - name: Share Image with Demo Project
+        run: |
+          gcloud compute images add-iam-policy-binding $IMAGE_NAME \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --member="projectEditor:${{ secrets.GCP_DEMO_PROJECT_ID }}" \
+            --role="roles/compute.imageUser"
+        shell: bash
