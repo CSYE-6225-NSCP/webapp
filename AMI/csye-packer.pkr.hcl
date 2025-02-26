@@ -104,8 +104,8 @@ variable "AWS_DEMO_ACCOUNT_ID" {
   default = env("AWS_DEMO_ACCOUNT_ID")
 }
 
-variable "GCP_DEMO_PROJECT_ID"{
-  type = string
+variable "GCP_DEMO_PROJECT_ID" {
+  type    = string
   default = env("GCP_DEMO_PROJECT_ID")
 }
 
@@ -147,7 +147,7 @@ source "googlecompute" "ubuntu" {
   service_account_email = var.service_account_email
   zone                  = var.gcp_zone
   ssh_username          = "packer"
-   image_projects = [var.GCP_PROJECT_ID, var.GCP_DEMO_PROJECT_ID]
+  image_projects        = [var.GCP_PROJECT_ID, var.GCP_DEMO_PROJECT_ID]
 }
 
 build {
