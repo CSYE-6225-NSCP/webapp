@@ -100,21 +100,15 @@ jobs:
           packer build -parallel-builds=2 csye-packer.pkr.hcl
 
 
-      - name: Get latest image name
-        id: latest_image
+      - name: Grant Access to Image in GCP
         run: |
-          IMAGE_NAME=$(gcloud compute images list \
-            --project=${{ secrets.GCP_PROJECT_ID }} \
-            --filter="name~'csye6225-${{ vars.ASSG_NAME }}'" \
-            --sort-by=~creationTimestamp \
-            --limit=1 \
-            --format="value(name)")
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          IMAGE_NAME=$(gcloud compute images list --project ${{ secrets.GCP_PROJECT_ID }} --sort-by="~creationTimestamp" --limit=1 --format="value(NAME)")
+          gcloud compute images add-iam-policy-binding "$IMAGE_NAME" \
+            --project="${{ secrets.GCP_PROJECT_ID }}" \
+            --member="serviceAccount:github-action@groovy-producer-452022-h7.iam.gserviceaccount.com" \
+            --role="roles/compute.imageUser"
 
-      - name: Share Image with Demo Project
-        run: |
-          gcloud compute images add-iam-policy-binding \
-            ${{ steps.latest_image.outputs.IMAGE_NAME }} \
-            --project=${{ secrets.GCP_PROJECT_ID }} \
-            --member="serviceAccount:${{ secrets.GCP_DEMO_PROJECT_ID }}@cloudservices.gserviceaccount.com" \
+          gcloud compute images add-iam-policy-binding "$IMAGE_NAME" \
+            --project="${{ secrets.GCP_PROJECT_ID }}" \
+            --member="projectEditor:${{ secrets.GCP_DEMO_PROJECT_ID }}" \
             --role="roles/compute.imageUser"
