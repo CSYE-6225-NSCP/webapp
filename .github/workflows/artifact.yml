@@ -102,13 +102,14 @@ jobs:
 
       - name: Grant Access to Image in GCP
         run: |
-          IMAGE_NAME=$(gcloud compute images list --project ${{ secrets.GCP_PROJECT_ID }} --sort-by="~creationTimestamp" --limit=1 --format="value(NAME)")
-          gcloud compute images add-iam-policy-binding "$IMAGE_NAME" \
-            --project="${{ secrets.GCP_PROJECT_ID }}" \
-            --member="serviceAccount:github-action@groovy-producer-452022-h7.iam.gserviceaccount.com" \
-            --role="roles/compute.imageUser"
+          IMAGE_NAME=$(gcloud compute images list \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --sort-by="~creationTimestamp" \
+            --limit=1 \
+            --format="value(NAME)")
+
 
           gcloud compute images add-iam-policy-binding "$IMAGE_NAME" \
             --project="${{ secrets.GCP_PROJECT_ID }}" \
-            --member="projectEditor:${{ secrets.GCP_DEMO_PROJECT_ID }}" \
+            --member="serviceAccount:github-action@groovy-producer-452022-h7.iam.gserviceaccount.com" \
             --role="roles/compute.imageUser"
