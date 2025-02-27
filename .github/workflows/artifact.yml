@@ -33,6 +33,7 @@ jobs:
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
       AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
       GCP_DEMO_PROJECT_ID: ${{ secrets.GCP_DEMO_PROJECT_ID }}
+      GCP_SERVICE_ACCOUNT_EMAIL_DEMO: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_DEMO }}
 
     steps:
       - name: Checkout repository
@@ -54,6 +55,17 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Authenticate with GCP with creds
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY_DEMO }}'
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_DEMO_PROJECT_ID }}
+
 
       - name: Verify GCP Authentication
         run: gcloud auth list
@@ -96,20 +108,6 @@ jobs:
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
           AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
           GCP_DEMO_PROJECT_ID: ${{ secrets.GCP_DEMO_PROJECT_ID }}
+          GCP_SERVICE_ACCOUNT_EMAIL_DEMO: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_DEMO }}
         run: |
           packer build -parallel-builds=2 csye-packer.pkr.hcl
-
-
-      - name: Grant Access to Image in GCP
-        run: |
-          IMAGE_NAME=$(gcloud compute images list \
-            --project "${{ secrets.GCP_PROJECT_ID }}" \
-            --sort-by="~creationTimestamp" \
-            --limit=1 \
-            --format="value(NAME)")
-
-
-          gcloud compute images add-iam-policy-binding "$IMAGE_NAME" \
-            --project="${{ secrets.GCP_PROJECT_ID }}" \
-            --member="serviceAccount:github-action@groovy-producer-452022-h7.iam.gserviceaccount.com" \
-            --role="roles/compute.imageUser"
