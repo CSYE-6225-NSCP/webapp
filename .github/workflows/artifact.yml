@@ -56,16 +56,6 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Authenticate with GCP with creds
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY_DEMO }}'
-
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_DEMO_PROJECT_ID }}
-
 
       - name: Verify GCP Authentication
         run: gcloud auth list
