@@ -27,12 +27,6 @@ variable "service_account_email" {
   default = env("GCP_SERVICE_ACCOUNT_EMAIL")
 }
 
-variable "service_account_email_demo" {
-  type    = string
-  default = env("GCP_SERVICE_ACCOUNT_EMAIL")
-}
-
-
 
 variable "aws_region" {
   type    = string
@@ -151,16 +145,6 @@ source "googlecompute" "ubuntu" {
   image_name            = "csye6225-${var.assg_name}-${formatdate("YYYYMMDD-HHmmss", timestamp())}"
   image_family          = "custom-images"
   service_account_email = var.service_account_email
-  zone                  = var.gcp_zone
-  ssh_username          = "packer"
-}
-
-source "googlecompute" "ubuntu_demo" {
-  project_id            = var.GCP_DEMO_PROJECT_ID
-  source_image_family   = "ubuntu-2204-lts"
-  image_name            = "csye6225-demo-${var.assg_name}-${formatdate("YYYYMMDD-HHmmss", timestamp())}"
-  image_family          = "custom-images"
-  service_account_email = var.service_account_email_demo
   zone                  = var.gcp_zone
   ssh_username          = "packer"
 }
