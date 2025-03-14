@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const healthCheckRouter = require('./src/routers/health');
 const { sequelize } = require('./src/models/model');
+const initDatabase = require('./src/db/initDatabase');
 require('dotenv').config();
 
 const app = express();
@@ -14,10 +15,10 @@ const PORT = process.env.PORT || process.env.SERVER_PORT;
 
 const startServer = async () => {
   try {
+    await initDatabase();
     await sequelize.authenticate();
-    await sequelize.sync();
-    console.log("Database connected and synced.");
-    
+    await sequelize.sync(); 
+
     const server = app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
