@@ -2,7 +2,7 @@ const express = require('express');
 const { HealthCheck, sequelize } = require('../models/model');
 const router = express.Router();
 
-router.head('/healthz', (req, res) => { return res.status(405)
+router.head('/', (req, res) => { return res.status(405)
   .set("cache-control", 'no-cache, no-store, must-revalidate')
   .set('Pragma', 'no-cache')
   .set('X-Content-Type-Options', 'nosniff')
@@ -10,7 +10,7 @@ router.head('/healthz', (req, res) => { return res.status(405)
 });
 
 
-router.get('/healthz', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     await sequelize.authenticate(); 
 
@@ -38,7 +38,7 @@ router.get('/healthz', async (req, res) => {
   }
 });
 
-router.all('/healthz', (req, res) => {
+router.all('/', (req, res) => {
   res.status(405)
   .set("cache-control", 'no-cache, no-store, must-revalidate')
   .set('Pragma', 'no-cache')
