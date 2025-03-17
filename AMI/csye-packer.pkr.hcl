@@ -163,11 +163,44 @@ build {
   }
 
   provisioner "shell" {
+    only = ["googlecompute.ubuntu"]
+    environment_vars = [
+      "DB_USER=${var.DB_USER}",
+      "DB_PASSWORD=${var.DB_PASSWORD}",
+      "DB_NAME=${var.DB_NAME}",
+      "DB_DIALECT=${var.DB_DIALECT}",
+      "DB_LOGGING=${var.DB_LOGGING}",
+      "DB_PORT=${var.DB_PORT}",
+      "DB_HOST=${var.DB_HOST}",
+      "SERVER_PORT=${var.SERVER_PORT}"
+    ]
+    script = "db.sh"
+  }
+
+  provisioner "shell" {
     script = "node.sh"
   }
 
   provisioner "shell" {
     environment_vars = [
+      "CLOUD_PROVIDER=GCP",
+      "DB_USER=${var.DB_USER}",
+      "DB_PASSWORD=${var.DB_PASSWORD}",
+      "DB_NAME=${var.DB_NAME}",
+      "DB_DIALECT=${var.DB_DIALECT}",
+      "DB_LOGGING=${var.DB_LOGGING}",
+      "DB_PORT=${var.DB_PORT}",
+      "DB_HOST=${var.DB_HOST}",
+      "SERVER_PORT=${var.SERVER_PORT}"
+    ]
+    script = "init.sh"
+    only   = ["googlecompute.ubuntu"]
+  }
+
+  provisioner "shell" {
+    only = ["amazon-ebs.ubuntu"]
+    environment_vars = [
+      "CLOUD_PROVIDER=AWS",
       "SERVER_PORT=${var.SERVER_PORT}"
     ]
     script = "init.sh"
