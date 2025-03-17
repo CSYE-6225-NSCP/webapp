@@ -20,10 +20,6 @@ const File = sequelize.define('File', {
     allowNull: false,
     defaultValue: DataTypes.NOW
   },
-  user_id: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
 }, {
   timestamps: false,
   tableName: 'Files',
