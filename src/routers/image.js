@@ -9,17 +9,13 @@ const s3 = new AWS.S3();
 
 router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { user_id } = req.body;
     const file = req.file;
-
     if (!file) {
-      return res.status(400).json({ message: 'File is required' });
+      return res.status(400).end();
     }
 
-    const actualUserId = user_id || uuidv4();
-
     const id = uuidv4();
-    const key = `${actualUserId}/${id}/${file.originalname}`;
+    const key = `${process.env.S3_BUCKET_NAME}/${id}/${file.originalname}`;
 
     await s3.upload({
       Bucket: process.env.S3_BUCKET_NAME,
@@ -31,8 +27,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     const uploadedFile = await File.create({
       id,
       file_name: file.originalname,
-      url: key,
-      user_id: actualUserId,
+      url: key
     });
 
     res.status(201).json({
@@ -40,7 +35,6 @@ router.post('/', upload.single('file'), async (req, res) => {
       file_name: uploadedFile.file_name,
       url: uploadedFile.url,
       upload_date: uploadedFile.upload_date.toISOString().split('T')[0],
-      user_id: uploadedFile.user_id,
     });
   } catch (error) {
     console.error(error);
@@ -48,34 +42,35 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.body;
-    if (!id) return res.status(400).json({ error: "Missing file id" });
+    const { id } = req.params;
 
     const file = await File.findByPk(id);
-    if (!file) return res.status(404).json({ error: "File not found" });
+
+    if (!file) {
+      return res.status(404).end();
+    }
 
     res.status(200).json({
       file_name: file.file_name,
       id: file.id,
       url: file.url,
       upload_date: file.upload_date.toISOString().split('T')[0],
-      user_id: file.user_id
     });
   } catch (error) {
-    console.error(error);
     res.status(500).end();
   }
 });
 
-router.delete('/', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.body;
-    if (!id) return res.status(400).json({ error: "Missing file id" });
+    const { id } = req.params;
 
     const file = await File.findByPk(id);
-    if (!file) return res.status(404).json({ error: "File not found" });
+    if (!file) {
+      return res.status(404).end();
+    }
 
     await s3.deleteObject({
       Bucket: process.env.S3_BUCKET_NAME,
@@ -83,10 +78,10 @@ router.delete('/', async (req, res) => {
     }).promise();
 
     await file.destroy();
-    res.status(204).end();
+
+    return res.status(204).end();
   } catch (error) {
-    console.error(error);
-    res.status(500).end();
+    return res.status(500).end();
   }
 });
 
