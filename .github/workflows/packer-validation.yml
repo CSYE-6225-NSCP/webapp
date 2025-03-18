@@ -62,11 +62,3 @@ jobs:
         run: |
           packer validate csye-packer.pkr.hcl
         shell: bash
-
-      - name: Sharing image with demo
-        run: |
-          IMAGE_NAME="csye6225-image-1"
-          gcloud compute images create "$IMAGE_NAME" \
-            --source-image="$IMAGE_NAME" \
-            --source-image-project="${{ secrets.GCP_PROJECT_ID }}" \
-            --project="${{ secrets.GCP_DEMO_PROJECT_ID }}"
