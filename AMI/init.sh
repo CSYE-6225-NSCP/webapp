@@ -10,19 +10,6 @@ sudo useradd --system --no-create-home --shell /usr/sbin/nologin -g csye6225 csy
 sudo mkdir -p /opt/webapp
 sudo unzip /tmp/webapp.zip -d /opt/webapp
 
-if [[ "$CLOUD_PROVIDER" == "GCP" ]]; then
-  {
-    echo "DB_USER=${DB_USER}"
-    echo "DB_PASSWORD=${DB_PASSWORD}"
-    echo "DB_NAME=${DB_NAME}"
-    echo "DB_DIALECT=${DB_DIALECT}"
-    echo "DB_LOGGING=${DB_LOGGING}"
-    echo "DB_PORT=${DB_PORT}"
-    echo "DB_HOST=${DB_HOST}"
-    echo "SERVER_PORT=${SERVER_PORT}"
-  } | sudo tee /opt/webapp/.env
-fi
-
 cd /opt/webapp
 sudo npm install --omit=dev
 

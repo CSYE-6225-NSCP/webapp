@@ -19,8 +19,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      GCP_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
       SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
       INSTANCE_TYPE: ${{ secrets.INSTANCE_TYPE }}
       DB_HOST: ${{ secrets.DB_HOST }}
@@ -32,8 +30,6 @@ jobs:
       DB_LOGGING: ${{ secrets.DB_LOGGING }}
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
       AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
-      GCP_DEMO_PROJECT_ID: ${{ secrets.GCP_DEMO_PROJECT_ID }}
-      GCP_SERVICE_ACCOUNT_EMAIL_DEMO: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_DEMO }}
 
     steps:
       - name: Checkout repository
@@ -86,8 +82,6 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          GCP_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -97,7 +91,5 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
           AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
-          GCP_DEMO_PROJECT_ID: ${{ secrets.GCP_DEMO_PROJECT_ID }}
-          GCP_SERVICE_ACCOUNT_EMAIL_DEMO: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_DEMO }}
         run: |
-          packer build -parallel-builds=2 csye-packer.pkr.hcl
+          packer build csye-packer.pkr.hcl

@@ -15,7 +15,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     }
 
     const id = uuidv4();
-    const key = `${process.env.S3_BUCKET_NAME}/${id}/${file.originalname}`;
+    const key = `${id}/${file.originalname}`;
 
     await s3.upload({
       Bucket: process.env.S3_BUCKET_NAME,
@@ -33,7 +33,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     res.status(201).json({
       id: uploadedFile.id,
       file_name: uploadedFile.file_name,
-      url: uploadedFile.url,
+      url: `${process.env.S3_BUCKET_NAME}/${key}`,
       upload_date: uploadedFile.upload_date.toISOString().split('T')[0],
     });
   } catch (error) {
@@ -55,7 +55,7 @@ router.get('/:id', async (req, res) => {
     res.status(200).json({
       file_name: file.file_name,
       id: file.id,
-      url: file.url,
+      url:`${process.env.S3_BUCKET_NAME}/${file.url}`,
       upload_date: file.upload_date.toISOString().split('T')[0],
     });
   } catch (error) {
