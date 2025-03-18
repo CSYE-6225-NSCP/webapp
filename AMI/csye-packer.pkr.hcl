@@ -4,27 +4,7 @@ packer {
       version = ">= 1.2.8, <2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
-    googlecompute = {
-      version = ">= 1.1.0"
-      source  = "github.com/hashicorp/googlecompute"
-    }
   }
-}
-
-
-variable "gcp_project_id" {
-  type    = string
-  default = env("GCP_PROJECT_ID")
-}
-
-variable "gcp_zone" {
-  type    = string
-  default = "us-central1-a"
-}
-
-variable "service_account_email" {
-  type    = string
-  default = env("GCP_SERVICE_ACCOUNT_EMAIL")
 }
 
 
@@ -104,10 +84,6 @@ variable "AWS_DEMO_ACCOUNT_ID" {
   default = env("AWS_DEMO_ACCOUNT_ID")
 }
 
-variable "GCP_DEMO_PROJECT_ID" {
-  type    = string
-  default = env("GCP_DEMO_PROJECT_ID")
-}
 
 
 source "amazon-ebs" "ubuntu" {
@@ -139,18 +115,9 @@ source "amazon-ebs" "ubuntu" {
 
   ami_users = [var.AWS_DEMO_ACCOUNT_ID]
 }
-source "googlecompute" "ubuntu" {
-  project_id            = var.gcp_project_id
-  source_image_family   = "ubuntu-2204-lts"
-  image_name            = "csye6225-image-1"
-  image_family          = "custom-images"
-  service_account_email = var.service_account_email
-  zone                  = var.gcp_zone
-  ssh_username          = "packer"
-}
 
 build {
-  sources = ["source.amazon-ebs.ubuntu", "source.googlecompute.ubuntu"]
+  sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
     source      = "./files/webapp.zip"
@@ -163,46 +130,11 @@ build {
   }
 
   provisioner "shell" {
-    only = ["googlecompute.ubuntu"]
-    environment_vars = [
-      "DB_USER=${var.DB_USER}",
-      "DB_PASSWORD=${var.DB_PASSWORD}",
-      "DB_NAME=${var.DB_NAME}",
-      "DB_DIALECT=${var.DB_DIALECT}",
-      "DB_LOGGING=${var.DB_LOGGING}",
-      "DB_PORT=${var.DB_PORT}",
-      "DB_HOST=${var.DB_HOST}",
-      "SERVER_PORT=${var.SERVER_PORT}"
-    ]
-    script = "db.sh"
-  }
-
-  provisioner "shell" {
     script = "node.sh"
   }
 
-  provisioner "shell" {
-    environment_vars = [
-      "CLOUD_PROVIDER=GCP",
-      "DB_USER=${var.DB_USER}",
-      "DB_PASSWORD=${var.DB_PASSWORD}",
-      "DB_NAME=${var.DB_NAME}",
-      "DB_DIALECT=${var.DB_DIALECT}",
-      "DB_LOGGING=${var.DB_LOGGING}",
-      "DB_PORT=${var.DB_PORT}",
-      "DB_HOST=${var.DB_HOST}",
-      "SERVER_PORT=${var.SERVER_PORT}"
-    ]
-    script = "init.sh"
-    only   = ["googlecompute.ubuntu"]
-  }
 
   provisioner "shell" {
-    only = ["amazon-ebs.ubuntu"]
-    environment_vars = [
-      "CLOUD_PROVIDER=AWS",
-      "SERVER_PORT=${var.SERVER_PORT}"
-    ]
     script = "init.sh"
   }
 }
