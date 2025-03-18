@@ -101,10 +101,3 @@ jobs:
           GCP_SERVICE_ACCOUNT_EMAIL_DEMO: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL_DEMO }}
         run: |
           packer build -parallel-builds=2 csye-packer.pkr.hcl
-
-      - name: Sharing image with demo
-        run: |
-          gcloud compute images create "csye-2" \
-            --source-image="csye6225-image-1" \
-            --source-image-project="development-452022" \
-            --project="groovy-producer-452022-h7"
