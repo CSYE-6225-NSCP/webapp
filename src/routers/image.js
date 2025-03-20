@@ -18,7 +18,6 @@ router.head('/:id', (req, res) => {
 
 
 router.post('/', upload.single('profilePic'), async (req, res) => {
-  try {
     const file = req.file;
     if (!file) {
       return res.status(400).end();
@@ -46,14 +45,10 @@ router.post('/', upload.single('profilePic'), async (req, res) => {
       url: `${process.env.S3_BUCKET_NAME}/${key}`,
       upload_date: uploadedFile.upload_date.toISOString().split('T')[0],
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).end();
-  }
-});
+  } 
+);
 
 router.get('/:id', async (req, res) => {
-  try {
     const { id } = req.params;
 
     const file = await File.findByPk(id);
@@ -68,33 +63,27 @@ router.get('/:id', async (req, res) => {
       url:`${process.env.S3_BUCKET_NAME}/${file.url}`,
       upload_date: file.upload_date.toISOString().split('T')[0],
     });
-  } catch (error) {
-    res.status(500).end();
-  }
-});
+  } 
+);
 
 router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const file = await File.findByPk(id);
+    const file = await File.findByPk(req.params.id);
     if (!file) {
       return res.status(404).end();
     }
 
+    const key = file.url.split(`${process.env.S3_BUCKET_NAME}/`)[1];
+
     await s3.deleteObject({
       Bucket: process.env.S3_BUCKET_NAME,
-      Key: file.url,
+      Key: key,
     }).promise();
 
     await file.destroy();
 
-    return res.status(204).end();
-  } catch (error) {
-    return res.status(500).end();
-  }
-});
-
+    return res.status(204).end(); 
+  } 
+);
 
 router.all('/', (req, res) => {
   if (req.method === 'GET' || req.method === 'DELETE') {
