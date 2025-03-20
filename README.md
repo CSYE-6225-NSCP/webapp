@@ -54,16 +54,16 @@ To start/stop mysql server : `sudo /usr/local/mysql-9.2.0-macos15-arm64/support-
 * created the directory of /opt/csye6225
                  sudo mkdir -p /opt/csye6225/
 * Then uploaded my zip file into server using the command :
-                  `scp -i ~/.ssh/do /Users/chaitanyam/Desktop/webapp-main.zip root@ipv4:/opt/csye6225/ 
+`scp -i ~/.ssh/do /Users/chaitanyam/Desktop/webapp-main.zip root@ipv4:/opt/csye6225/ 
 
 
     install mysql in ubuntu server: sudo apt install mysql-server -y`
 
 * Then written scripts of health.sh with .env 
 
-                            DB_NAME=
-                            DB_USER=
-                            DB_PASSWORD=
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
 
 
 * then run the scripts using bash health.sh
@@ -83,6 +83,12 @@ To start/stop mysql server : `sudo /usr/local/mysql-9.2.0-macos15-arm64/support-
 * It installs the node and setup the node
 * After setting up it creates the database and user and perform the tests
 * If all the tests are passed then it allows to merge the request.
+
+PROFILE PIC ROUTES:
+
+In these routers the upload image to s3 bucket is handled and stores the image in the s3 bucket and meta data is stored in the database
+
+
 
 
 
