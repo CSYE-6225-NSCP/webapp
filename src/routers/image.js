@@ -7,7 +7,17 @@ const multer = require('multer');
 const upload = multer(); 
 const s3 = new AWS.S3();
 
-router.post('/', upload.single('file'), async (req, res) => {
+
+router.head('/', (req, res) => {
+  return res.status(405).end();
+});
+
+router.head('/:id', (req, res) => {
+  return res.status(405).end();
+});
+
+
+router.post('/', upload.single('profilePic'), async (req, res) => {
   try {
     const file = req.file;
     if (!file) {
@@ -27,7 +37,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     const uploadedFile = await File.create({
       id,
       file_name: file.originalname,
-      url: key
+      url: `${process.env.S3_BUCKET_NAME}/${key}`,
     });
 
     res.status(201).json({
@@ -82,6 +92,21 @@ router.delete('/:id', async (req, res) => {
     return res.status(204).end();
   } catch (error) {
     return res.status(500).end();
+  }
+});
+
+
+router.all('/', (req, res) => {
+  if (req.method === 'GET' || req.method === 'DELETE') {
+    return res.status(400).end();
+  } else {
+    return res.status(405).end();
+  }
+});
+
+router.all('/:id', (req, res) => {
+  if (!['GET', 'DELETE'].includes(req.method)) {
+    return res.status(405).end();
   }
 });
 
