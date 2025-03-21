@@ -79,3 +79,4 @@ jobs:
           AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
         run: |
           packer build csye-packer.pkr.hcl
+
