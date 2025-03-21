@@ -134,13 +134,14 @@ build {
     script = "node.sh"
   }
 
+  provisioner "file" {
+    source      = "cloudWatch-config.json"
+    destination = "/tmp/cloudWatch-config.json"
+  }
+
 
   provisioner "shell" {
     script = "init.sh"
   }
 
-  provisioner "file" {
-    source      = "cloudWatch-config.json"
-    destination = "/tmp/cloudWatch-config.json"
-  }
 }
