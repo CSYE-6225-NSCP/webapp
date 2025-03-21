@@ -15,6 +15,11 @@ sudo npm install --omit=dev
 
 sudo chown -R csye6225:csye6225 /opt/webapp
 
+sudo mkdir -p /opt/webapp/logs
+sudo chown -R csye6225:csye6225 /opt/webapp/logs
+sudo mv /tmp/cloudwatch-config.json /opt/cloudwatch-config.json
+sudo chown csye6225:csye6225 /opt/cloudwatch-config.json
+
 sudo mv /tmp/webapp.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
