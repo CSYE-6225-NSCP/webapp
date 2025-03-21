@@ -15,7 +15,7 @@
                 ]
             }
         },
-        "log_stream_name": "cloudwatch_log_Stream"
+        "log_stream_name": "cloudwatch_log_stream"
     },
     "metrics":{
       "metrics_collected":{
