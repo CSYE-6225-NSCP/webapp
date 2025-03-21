@@ -119,6 +119,7 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
+
   provisioner "file" {
     source      = "./files/webapp.zip"
     destination = "/tmp/webapp.zip"
@@ -140,6 +141,6 @@ build {
 
   provisioner "file" {
     source      = "cloudwatch-config.json"
-    destination = "/tmp/"
+    destination = "/tmp/cloudwatch-config.json"
   }
 }
