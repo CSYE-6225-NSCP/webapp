@@ -1,6 +1,7 @@
 const request = require('supertest');
 const { app } = require('../app');
 const { sequelize, HealthCheck } = require('../src/models/model');
+const statsd = require('../src/metrics/statsd');
 
 describe('Health Check API Tests', () => {
   beforeAll(async () => {
@@ -9,7 +10,8 @@ describe('Health Check API Tests', () => {
   });
 
   afterAll(async () => {
-    await sequelize.close(); 
+    await sequelize.close();
+    statsd.close(); 
   });
 
   beforeEach(async () => {
