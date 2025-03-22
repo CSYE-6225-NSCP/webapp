@@ -6,4 +6,4 @@ const statsd = new StatsD({
   prefix: 'webapp.'
 });
 
-module.exports = statsd;
+module.exports = statsd; 

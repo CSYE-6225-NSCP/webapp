@@ -10,7 +10,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/healthz', healthCheckRouter); // Changed from '/' to '/healthz'
+app.use('/healthz', healthCheckRouter);
 app.use('/v1/file', fileRouter);
 
 
