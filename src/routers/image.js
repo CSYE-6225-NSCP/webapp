@@ -10,13 +10,13 @@ const logger = require('../../logger');
 const statsD = require('../metrics/statsd'); // StatsD client
 
 router.head('/', (req, res) => {
-  logger.info('HEAD /v1/file - Method not allowed');
+  logger.info('HEAD /v1/file - This method is not allowed');
   statsD.increment('webapp.api.file.head.request');
   return res.status(405).end();
 });
 
 router.head('/:id', (req, res) => {
-  logger.info(`HEAD /v1/file/${req.params.id} - Method not allowed`);
+  logger.info(`HEAD /v1/file/${req.params.id} - This method is not allowed`);
   statsD.increment('webapp.api.file.head.request');
   return res.status(405).end();
 });
@@ -24,12 +24,12 @@ router.head('/:id', (req, res) => {
 router.post('/', upload.single('profilePic'), async (req, res) => {
   const totalStart = Date.now();
   statsD.increment('webapp.api.file.post.request');
-  logger.info('POST /v1/file - File upload initiated');
+  logger.info('POST /v1/file - Starting file upload');
 
   const file = req.file;
   if (!file) {
-    logger.warn('POST /v1/file - No file received in request');
-    return res.status(400).json({ error: 'No file uploaded' });
+    logger.warn('POST /v1/file - No file was uploaded');
+    return res.status(400).end();
   }
 
   try {
@@ -45,7 +45,7 @@ router.post('/', upload.single('profilePic'), async (req, res) => {
     }).promise();
     const s3Duration = Date.now() - s3Start;
     statsD.timing('webapp.s3.upload.duration', s3Duration);
-    logger.info(`S3 upload successful for ${file.originalname} (Duration: ${s3Duration} ms)`);
+    logger.info(`File "${file.originalname}" uploaded to S3 in ${s3Duration} ms`);
 
     const dbStart = Date.now();
     const uploadedFile = await File.create({
@@ -55,11 +55,11 @@ router.post('/', upload.single('profilePic'), async (req, res) => {
     });
     const dbDuration = Date.now() - dbStart;
     statsD.timing('webapp.db.file.insert.duration', dbDuration);
-    logger.info(`File metadata inserted into DB (Duration: ${dbDuration} ms)`);
+    logger.info(`Saved file metadata to the database in ${dbDuration} ms`);
 
     const totalDuration = Date.now() - totalStart;
     statsD.timing('webapp.api.file.post.duration', totalDuration);
-    logger.info(`POST /v1/file completed in ${totalDuration} ms`);
+    logger.info(`File upload completed successfully in ${totalDuration} ms`);
 
     res.status(201).json({
       id: uploadedFile.id,
@@ -69,7 +69,7 @@ router.post('/', upload.single('profilePic'), async (req, res) => {
     });
   } catch (error) {
     logger.error(`POST /v1/file - Upload failed: ${error.message}`);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(400).end();
   }
 });
 
@@ -77,19 +77,19 @@ router.get('/:id', async (req, res) => {
   const totalStart = Date.now();
   statsD.increment('webapp.api.file.get.request');
   const { id } = req.params;
-  logger.info(`GET /v1/file/${id} - File fetch initiated`);
+  logger.info(`GET /v1/file/${id} - Retrieving file information`);
 
   try {
     const file = await File.findByPk(id);
 
     if (!file) {
-      logger.warn(`GET /v1/file/${id} - File not found`);
-      return res.status(404).json({ error: 'File not found' });
+      logger.warn(`GET /v1/file/${id} - No file found with this ID`);
+      return res.status(404).send();
     }
 
     const duration = Date.now() - totalStart;
     statsD.timing('webapp.api.file.get.duration', duration);
-    logger.info(`GET /v1/file/${id} - File retrieved in ${duration} ms`);
+    logger.info(`File details retrieved successfully in ${duration} ms`);
 
     res.status(200).json({
       id: file.id,
@@ -98,8 +98,8 @@ router.get('/:id', async (req, res) => {
       upload_date: file.upload_date.toISOString().split('T')[0],
     });
   } catch (error) {
-    logger.error(`GET /v1/file/${id} - Error: ${error.message}`);
-    res.status(500).json({ error: 'Internal Server Error' });
+    logger.error(`GET /v1/file/${id} - Failed to get file details: ${error.message}`);
+    res.status(400).end();
   }
 });
 
@@ -107,13 +107,13 @@ router.delete('/:id', async (req, res) => {
   const totalStart = Date.now();
   statsD.increment('webapp.api.file.delete.request');
   const { id } = req.params;
-  logger.info(`DELETE /v1/file/${id} - Deletion initiated`);
+  logger.info(`DELETE /v1/file/${id} - Deletion process started`);
 
   try {
     const file = await File.findByPk(id);
     if (!file) {
-      logger.warn(`DELETE /v1/file/${id} - File not found`);
-      return res.status(404).json({ error: 'File not found' });
+      logger.warn(`DELETE /v1/file/${id} - No file found to delete`);
+      return res.status(404).send();
     }
 
     const key = file.url.split(`${process.env.S3_BUCKET_NAME}/`)[1];
@@ -125,28 +125,28 @@ router.delete('/:id', async (req, res) => {
     }).promise();
     const s3Duration = Date.now() - s3Start;
     statsD.timing('webapp.s3.delete.duration', s3Duration);
-    logger.info(`S3 deletion successful (Duration: ${s3Duration} ms)`);
+    logger.info(`File deleted from S3 in ${s3Duration} ms`);
 
     const dbStart = Date.now();
     await file.destroy();
     const dbDuration = Date.now() - dbStart;
     statsD.timing('webapp.db.file.delete.duration', dbDuration);
-    logger.info(`File record deleted from DB (Duration: ${dbDuration} ms)`);
+    logger.info(`File record removed from database in ${dbDuration} ms`);
 
     const totalDuration = Date.now() - totalStart;
     statsD.timing('webapp.api.file.delete.duration', totalDuration);
-    logger.info(`DELETE /v1/file/${id} - Completed in ${totalDuration} ms`);
+    logger.info(`DELETE /v1/file/${id} - Deletion completed in ${totalDuration} ms`);
 
     return res.status(204).end();
   } catch (error) {
-    logger.error(`DELETE /v1/file/${id} - Error: ${error.message}`);
-    res.status(500).json({ error: 'Internal Server Error' });
+    logger.error(`DELETE /v1/file/${id} - Deletion failed: ${error.message}`);
+    res.status(400).send();
   }
 });
 
 router.all('/', (req, res) => {
   statsD.increment(`webapp.api.file.invalid_method.${req.method.toLowerCase()}`);
-  logger.warn(`ALL /v1/file - Invalid method ${req.method}`);
+  logger.warn(`Invalid HTTP method "${req.method}" used at /v1/file`);
   const status = ['GET', 'DELETE'].includes(req.method) ? 400 : 405;
   return res.status(status).end();
 });
@@ -154,7 +154,7 @@ router.all('/', (req, res) => {
 router.all('/:id', (req, res) => {
   if (!['GET', 'DELETE'].includes(req.method)) {
     statsD.increment(`webapp.api.file.invalid_method.${req.method.toLowerCase()}`);
-    logger.warn(`ALL /v1/file/${req.params.id} - Invalid method ${req.method}`);
+    logger.warn(`Invalid HTTP method "${req.method}" used at /v1/file/${req.params.id}`);
     return res.status(405).end();
   }
 });
