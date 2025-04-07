@@ -95,7 +95,7 @@ jobs:
             echo "Sharing AMI $AMI_ID with DEMO account..."
             aws ec2 modify-image-attribute --image-id "$AMI_ID" \
               --launch-permission "{\"Add\": [{\"UserId\": \"${{ env.DEMO_USER }}\"}]}"
-            echo "::set-output name=ami_id::$AMI_ID"
+            echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
             echo "$AMI_ID" > ami_id.txt
           else
             echo "AMI not found, exiting."
@@ -110,3 +110,43 @@ jobs:
 
               echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
               echo "$AMI_ID" > ami_id.txt
+
+  autoscaling_refresh:
+    needs: build-ami
+    runs-on: ubuntu-latest
+    name: Auto Scaling Group Launch Template & Instance Refresh
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      DEPLOY_ENVIRONMENT: ${{ secrets.DEPLOY_ENVIRONMENT }}
+      LAUNCH_TEMPLATE_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }}
+      AUTO_SCALING_GROUP_NAME: ${{ secrets.AUTO_SCALING_GROUP_NAME }}
+
+    steps:
+      - name: Download AMI_ID Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ami_id
+
+      - name: Read AMI_ID
+        id: read_ami_id
+        run: |
+          AMI_ID=$(cat ami_id.txt)
+          echo "AMI_ID: $AMI_ID"
+          echo "ami_id=$AMI_ID" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials for Dev
+        if: ${{ env.DEPLOY_ENVIRONMENT == 'dev' }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS Credentials for Demo
+        if: ${{ env.DEPLOY_ENVIRONMENT == 'demo' }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
+          aws-region: ${{ env.AWS_REGION }}
