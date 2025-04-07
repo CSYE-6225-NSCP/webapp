@@ -112,7 +112,7 @@ jobs:
               echo "$AMI_ID" > ami_id.txt
 
   autoscaling_refresh:
-    needs: build-ami
+    needs: packer-build
     runs-on: ubuntu-latest
     name: Auto Scaling Group Launch Template & Instance Refresh
 
