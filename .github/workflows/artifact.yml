@@ -1,26 +1,24 @@
-name: Packer Build & ASG Instance Refresh
+name: Packer Build for AWS and GCP
 
 on:
   push:
     branches:
       - main
 
-env:
-  DEPLOY_ENVIRONMENT: ${{ secrets.DEPLOY_ENVIRONMENT }}
-
 jobs:
-  build:
-    name: Checkout
+  build: 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
   packer-build:
-    name: Build AMIs with Packer
     needs: build
     runs-on: ubuntu-latest
     env:
-      DEPLOY_ENVIRONMENT: ${{ env.DEPLOY_ENVIRONMENT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
       SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
       INSTANCE_TYPE: ${{ secrets.INSTANCE_TYPE }}
       DB_HOST: ${{ secrets.DB_HOST }}
@@ -31,98 +29,84 @@ jobs:
       DB_DIALECT: ${{ secrets.DB_DIALECT }}
       DB_LOGGING: ${{ secrets.DB_LOGGING }}
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
+      DEMO_USER: ${{ secrets.DEMO_USER }}
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # 1) Configure AWS credentials based on environment
-      - name: Configure AWS Credentials for Dev
-        if: env.DEPLOY_ENVIRONMENT == 'dev'
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          aws-region:            ${{ secrets.AWS_REGION_DEV }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Configure AWS Credentials for Demo
-        if: env.DEPLOY_ENVIRONMENT == 'demo'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
-          aws-region:            ${{ secrets.AWS_REGION_DEMO }}
-
-      # 2) Install & run Packer
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
-      - name: Package webapp
+      - name: Create webapp.zip from existing directory
         run: zip -r webapp.zip .
         shell: bash
 
-      - name: Prepare Packer files
+      - name: Prepare Packer Files
         run: |
           mkdir -p AMI/files
           mv webapp.zip AMI/files/
 
-      - name: Packer init & validate
+      - name: Run `packer init`
         working-directory: AMI
+        run: packer init csye-packer.pkr.hcl
+
+      - name: Run `packer validate`
+        working-directory: AMI
+        run: packer validate csye-packer.pkr.hcl 
+
+      - name: Build AWS and GCP Images in Parallel
+        working-directory: AMI
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_DIALECT: ${{ secrets.DB_DIALECT }}
+          DB_LOGGING: ${{ secrets.DB_LOGGING }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
+          DEMO_USER: ${{ secrets.DEMO_USER }}
         run: |
-          packer init csye-packer.pkr.hcl
-          packer validate csye-packer.pkr.hcl
-
-      - name: Build AWS & GCP images
-        working-directory: AMI
-        run: packer build csye-packer.pkr.hcl
-
-  build-ami:
-    name: Share AMI & Upload ID
-    needs: packer-build
-    runs-on: ubuntu-latest
-    env:
-      DEPLOY_ENVIRONMENT:   ${{ env.DEPLOY_ENVIRONMENT }}
-      DEMO_ACCOUNT_ID:      ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
-    steps:
-      - uses: actions/checkout@v3
-
-      # Re-configure AWS creds (same pattern as above)
-      - name: Configure AWS Credentials for Dev
-        if: env.DEPLOY_ENVIRONMENT == 'dev'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          aws-region:            ${{ secrets.AWS_REGION_DEV }}
-
-      - name: Configure AWS Credentials for Demo
-        if: env.DEPLOY_ENVIRONMENT == 'demo'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
-          aws-region:            ${{ secrets.AWS_REGION_DEMO }}
+          packer build csye-packer.pkr.hcl
 
       - name: Share the AMI and Save AMI_ID
         id: share_ami
         run: |
           AMI_ID=$(aws ec2 describe-images \
-            --owners self \
-            --filters "Name=state,Values=available" \
-            --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
-            --output text)
-          if [ -z "$AMI_ID" ]; then
+              --owners self \
+              --filters "Name=state,Values=available" \
+              --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
+              --output text)
+
+          if [ -n "$AMI_ID" ]; then
+            echo "Sharing AMI $AMI_ID with DEMO account..."
+            aws ec2 modify-image-attribute --image-id "$AMI_ID" \
+              --launch-permission "{\"Add\": [{\"UserId\": \"${{ env.DEMO_USER }}\"}]}"
+            echo "::set-output name=ami_id::$AMI_ID"
+            echo "$AMI_ID" > ami_id.txt
+          else
             echo "AMI not found, exiting."
             exit 1
           fi
-          echo "Found AMI_ID=$AMI_ID"
-          echo "Sharing with account $DEMO_ACCOUNT_ID…"
-          aws ec2 modify-image-attribute \
-            --image-id "$AMI_ID" \
-            --launch-permission "{\"Add\": [{\"UserId\": \"$DEMO_ACCOUNT_ID\"}]}"
-          echo "::set-output name=ami_id::$AMI_ID"
-          echo "$AMI_ID" > ami_id.txt
 
       - name: Upload AMI_ID Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ami_id
           path: ami_id.txt
+
+              echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
+              echo "$AMI_ID" > ami_id.txt
