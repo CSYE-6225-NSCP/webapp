@@ -11,7 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/healthz', healthCheckRouter);
-app.use('/test', healthCheckRouter);
+
 app.use('/v1/file', async (req, res, next) => {
   try {
     await sequelize.authenticate();

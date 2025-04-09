@@ -135,7 +135,6 @@ jobs:
           echo "AMI_ID: $AMI_ID"
           echo "ami_id=$AMI_ID" >> $GITHUB_ENV
 
-      # configure credentials based on the environment
 
       - name: Configure AWS Credentials for Dev
         if: ${{ env.DEPLOY_ENVIRONMENT_ACCOUNT == 'dev' }}
@@ -153,7 +152,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # create the new template version with new ami id
 
       - name: Create New Template Version
         id: create_lt_version
@@ -166,7 +164,6 @@ jobs:
               --launch-template-data "{\"ImageId\":\"$AMI_ID\"}" \
               --no-cli-pager
 
-      # Start Instance Refresh for Auto Scaling Group
       - name: Start Instance Refresh
         id: start_refresh
         run: |
@@ -178,7 +175,6 @@ jobs:
           echo "Instance Refresh started with ID: $REFRESH_ID"
           echo "instance_refresh_id=$REFRESH_ID" >> $GITHUB_ENV
 
-      # Wait for Instance Refresh to complete the work
       - name: Wait for Instance Refresh Completion
         run: |
           echo "Waiting for instance refresh to complete..."
