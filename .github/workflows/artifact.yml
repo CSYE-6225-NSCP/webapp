@@ -63,7 +63,7 @@ jobs:
         working-directory: AMI
         run: packer validate csye-packer.pkr.hcl 
 
-      - name: Build AWS and GCP Images in Parallel
+      - name: Build AWS AMI
         working-directory: AMI
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
