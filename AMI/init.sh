@@ -4,6 +4,12 @@ set -ex
 sudo apt-get update
 sudo apt-get install -y unzip
 
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+
 sudo groupadd --system csye6225
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin -g csye6225 csye6225
 
